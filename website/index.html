@@ -28,55 +28,42 @@
             position: relative;
         }
 
-        /* --- ستارة خلفية الورد الكاملة --- */
+        /* --- شاشة الورد المتساقط الناعم --- */
         #flowersOverlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            /* خلفية بتصميم الورد الجميل المطابق للشاشة */
-            background-color: #fce4ec;
-            background-image: 
-                radial-gradient(circle at 20% 20%, #f48fb1 15%, transparent 25%),
-                radial-gradient(circle at 80% 30%, #f8bbd0 20%, transparent 30%),
-                radial-gradient(circle at 40% 70%, #f48fb1 18%, transparent 28%),
-                radial-gradient(circle at 85% 85%, #f8bbd0 22%, transparent 32%),
-                radial-gradient(circle at 10% 85%, #f8bbd0 18%, transparent 28%);
-            background-size: 100px 100px;
-            pointer-events: auto;
+            background: rgba(255, 240, 243, 0.85);
+            pointer-events: none;
             z-index: 9999;
+            overflow: hidden;
             display: none;
             opacity: 1;
-            transition: opacity 1.5s ease-in-out;
-            cursor: pointer;
+            transition: opacity 1.2s ease-out;
         }
 
-        /* تفاصيل زهور وردية وبيضاء تغطي الشاشة */
-        .flower-pattern-overlay {
+        .flower-petal {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            align-content: space-around;
-            font-size: 3.5rem;
+            top: -100px;
             user-select: none;
-            padding: 10px;
-            box-sizing: border-box;
+            animation: fall linear forwards;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
         }
 
-        .flower-item {
-            animation: pulseFlower 2s infinite alternate ease-in-out;
-            filter: drop-shadow(0 4px 8px rgba(220, 100, 140, 0.3));
-        }
-
-        @keyframes pulseFlower {
-            0% { transform: scale(0.95) rotate(-3deg); }
-            100% { transform: scale(1.1) rotate(3deg); }
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(0.8);
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(115vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
         }
 
         /* --- مشغل الموسيقى المثبت --- */
@@ -341,10 +328,8 @@
 </head>
 <body>
 
-    <!-- ستارة غلاف الورد الكثيفة الكاملة -->
-    <div id="flowersOverlay" onclick="dismissFlowerCover()">
-        <div class="flower-pattern-overlay" id="flowerPattern"></div>
-    </div>
+    <!-- طبقة تساقط الورد الناعم -->
+    <div id="flowersOverlay"></div>
 
     <!-- ملف الأغنية -->
     <audio id="bgMusic" src="music.mp3" loop></audio>
@@ -378,7 +363,7 @@
         <!-- قسم الجواب والرسالة الخاصة -->
         <div class="letter-section">
             <button class="envelope-btn" onclick="openLetter()">
-                <span>💌 دوسي هنا</span>
+                <span>💌 اضغطي هنا لفتح جوابك الخاص</span>
             </button>
             
             <div class="letter-card" id="letterCard">
@@ -426,45 +411,45 @@
                 playMusic();
                 renderCards();
 
-                // إظهار ستارة شاشة الورد الكاملة
-                showFlowerCover();
+                // تفعيل تساقط الورد الأولاني
+                startFlowerShower();
             } else {
                 document.getElementById('errorMsg').style.display = 'block';
             }
         }
 
-        // إنشاء وتغطية الشاشة بنقوش الورد الكثيفة
-        function showFlowerCover() {
+        // تساقط الورد الناعم المبهج
+        function startFlowerShower() {
             const overlay = document.getElementById('flowersOverlay');
-            const pattern = document.getElementById('flowerPattern');
-            
-            pattern.innerHTML = '';
-            const flowerIcons = ['🌸', '🌺', '🌹', '🌷', '💐', '💖', '🌸', '🌺', '🌸'];
-            
-            // إنشاء 65 ورود كبيرة تملأ الشاشة تماماً
-            for (let i = 0; i < 65; i++) {
-                const span = document.createElement('span');
-                span.className = 'flower-item';
-                span.innerText = flowerIcons[Math.floor(Math.random() * flowerIcons.length)];
-                span.style.animationDelay = (Math.random() * 1.5) + 's';
-                pattern.appendChild(span);
-            }
-
             overlay.style.display = 'block';
             overlay.style.opacity = '1';
+            overlay.innerHTML = '';
 
-            // تختفي الستارة تلقائياً بعد 3.5 ثانية أو عند الضغط عليها
-            setTimeout(() => {
-                dismissFlowerCover();
-            }, 3500);
-        }
+            const flowerIcons = ['🌸', '🌺', '🌹', '🌷', '✨', '💖'];
+            const totalFlowers = 70;
 
-        function dismissFlowerCover() {
-            const overlay = document.getElementById('flowersOverlay');
-            overlay.style.opacity = '0';
+            for (let i = 0; i < totalFlowers; i++) {
+                setTimeout(() => {
+                    const petal = document.createElement('div');
+                    petal.className = 'flower-petal';
+                    petal.innerText = flowerIcons[Math.floor(Math.random() * flowerIcons.length)];
+                    
+                    const size = (Math.random() * 2 + 1.8) + 'rem';
+                    petal.style.fontSize = size;
+                    
+                    petal.style.left = Math.random() * 100 + 'vw';
+                    petal.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                    
+                    overlay.appendChild(petal);
+                }, i * 40);
+            }
+
             setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 1500);
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 1200);
+            }, 3000);
         }
 
         function openLetter() {
