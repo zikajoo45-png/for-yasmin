@@ -28,24 +28,28 @@
             position: relative;
         }
 
-        /* --- حاوية الورد المتساقط --- */
-        #flowersContainer {
+        /* --- شاشة الورد الكثيف التي تغطي الصور تماماً --- */
+        #flowersOverlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
+            background: rgba(255, 240, 243, 0.98); /* خلفية تحجب ما خلفها */
             pointer-events: none;
             z-index: 9999;
             overflow: hidden;
+            display: none;
+            opacity: 1;
+            transition: opacity 1.2s ease-out; /* اختفاء ناعم للورد */
         }
 
         .flower-petal {
             position: absolute;
-            top: -50px;
-            font-size: 1.8rem;
+            top: -100px;
             user-select: none;
             animation: fall linear forwards;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
         }
 
         @keyframes fall {
@@ -53,11 +57,11 @@
                 transform: translateY(0) rotate(0deg) scale(0.8);
                 opacity: 1;
             }
-            70% {
+            80% {
                 opacity: 1;
             }
             100% {
-                transform: translateY(105vh) rotate(360deg) scale(1.2);
+                transform: translateY(115vh) rotate(360deg) scale(1.3);
                 opacity: 0;
             }
         }
@@ -305,7 +309,7 @@
             line-height: 1.8;
             color: #5c474e;
             font-weight: 600;
-            white-space: pre-line; /* للحفاظ على المسافات والسطور الجديدة */
+            white-space: pre-line;
             text-align: right;
             padding: 10px;
         }
@@ -324,8 +328,8 @@
 </head>
 <body>
 
-    <!-- حاوية احتفالية تساقط الورد -->
-    <div id="flowersContainer"></div>
+    <!-- الشاشة المغطاة بالورد الكثيف -->
+    <div id="flowersOverlay"></div>
 
     <!-- ملف الأغنية -->
     <audio id="bgMusic" src="music.mp3" loop></audio>
@@ -356,7 +360,7 @@
         <!-- قائمة الكروت -->
         <div class="cards-list" id="cardsList"></div>
 
-        <!-- قسم الجواب والرسالة الخاصة في النهاية -->
+        <!-- قسم الجواب والرسالة الخاصة -->
         <div class="letter-section">
             <button class="envelope-btn" onclick="openLetter()">
                 <span>💌 اضغطي هنا لفتح جوابك الخاص</span>
@@ -379,7 +383,7 @@
     <script>
         const CORRECT_PASS = "soso";
 
-        // ترتيب الصور والرسائل
+        // ترتيب الصور والرسائل حسب كودك المعدل
         const slidesData = [
             {
                 img: 'photo4.jpg',
@@ -405,31 +409,61 @@
                 document.getElementById('lockScreen').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'flex';
                 
-                // تشغيل الأغنية
                 playMusic();
-
-                // إطلاق تأثير تساقط الورد
-                triggerFlowerShower();
-
                 renderCards();
+
+                // إطلاق عاصفة الورد الكثيفة الحجم الكبير
+                startHeavyFlowerShower();
             } else {
                 document.getElementById('errorMsg').style.display = 'block';
             }
         }
 
-        // فتح الجواب
+        // دالة الورد الكثيف الكبير الذي يغطي الشاشة عند الفتح
+        function startHeavyFlowerShower() {
+            const overlay = document.getElementById('flowersOverlay');
+            overlay.style.display = 'block';
+            overlay.style.opacity = '1';
+            overlay.innerHTML = '';
+
+            const flowerIcons = ['🌸', '🌺', '🌹', '🌷', '✨', '💖'];
+            const totalFlowers = 90; // كثافة عالية جداً
+
+            for (let i = 0; i < totalFlowers; i++) {
+                setTimeout(() => {
+                    const petal = document.createElement('div');
+                    petal.className = 'flower-petal';
+                    petal.innerText = flowerIcons[Math.floor(Math.random() * flowerIcons.length)];
+                    
+                    // حجم الورد كبير جداً ليملأ الشاشة
+                    const size = (Math.random() * 3 + 3.2) + 'rem';
+                    petal.style.fontSize = size;
+                    
+                    petal.style.left = Math.random() * 100 + 'vw';
+                    petal.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                    
+                    overlay.appendChild(petal);
+                }, i * 40);
+            }
+
+            // بعد 3.5 ثانية تتلاشى طبقة الورد تدريجياً لتظهر الصور والجواب
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 1200);
+            }, 3500);
+        }
+
         function openLetter() {
             const letterCard = document.getElementById('letterCard');
             if (letterCard.style.display === 'block') {
                 letterCard.style.display = 'none';
             } else {
                 letterCard.style.display = 'block';
-                // إطلاق موجة ورد ثانية احتفالاً بفتح الجواب
-                triggerFlowerShower();
             }
         }
 
-        // التحكم في الموسيقى
         const audio = document.getElementById('bgMusic');
         const musicBtn = document.getElementById('musicToggleBtn');
         const musicStatus = document.getElementById('musicStatus');
@@ -450,30 +484,6 @@
                 audio.pause();
                 musicBtn.innerText = '🔇';
                 musicStatus.innerText = 'الأغنية متوقفة ⏸️';
-            }
-        }
-
-        // دالة إنشاء تأثير مطر الورد
-        function triggerFlowerShower() {
-            const container = document.getElementById('flowersContainer');
-            const flowerIcons = ['🌸', '🌺', '🌹', '🌷', '✨', '💖'];
-            const totalFlowers = 40;
-
-            for (let i = 0; i < totalFlowers; i++) {
-                setTimeout(() => {
-                    const petal = document.createElement('div');
-                    petal.className = 'flower-petal';
-                    petal.innerText = flowerIcons[Math.floor(Math.random() * flowerIcons.length)];
-                    
-                    petal.style.left = Math.random() * 100 + 'vw';
-                    petal.style.animationDuration = (Math.random() * 2 + 2.5) + 's';
-                    
-                    container.appendChild(petal);
-
-                    setTimeout(() => {
-                        petal.remove();
-                    }, 4500);
-                }, i * 80);
             }
         }
 
